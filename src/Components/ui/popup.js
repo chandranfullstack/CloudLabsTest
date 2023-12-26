@@ -1,14 +1,29 @@
 import { useState } from 'react';
 
-const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas,onAddSchema,onSaveSegment }) =>{
+const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas,onAddSchema,onSaveSegment ,setSelectedSchemas}) =>{
   const [newSchema,setNewSchema]=useState('');
+  const [error,setIsError]=useState(false)
+  const [schemaError,setSchemaError]=useState(false)
 
   const handleAddNewSchema=()=>{
-    if(newSchema&&!selectedSchemas.some((s)=>s.value===newSchema)){
+    if(segmentName.length!==0){
+      if(newSchema&&!selectedSchemas.some((s)=>s.value===newSchema)){
         onAddSchema(schemaOptions.find((s)=>s.value===newSchema))
         setNewSchema('')
     }
+    }else if(segmentName.length===0){
+      setIsError(true)
+    }
+
   };
+
+  const handleRemoveSchema=(removeSchema)=>{
+        setSelectedSchemas(prevOptions => prevOptions.filter(option => option.value !== removeSchema));
+  }
+
+  const handleReset=()=>{
+        setNewSchema("")
+  }
 
   return (
     <>
@@ -16,12 +31,13 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
      <div className=' bg-white p-8'>
        <div className=' mb-4'>
         <label className=' inline-flex mb-4'>Enter the Name of the Segment</label>
+        {error&&<p className=' font-medium text-sm text-red-500 mb-1'>Name is required</p>}
         <input 
         type="text" 
         placeholder='Name of the segment'
-        className=" w-full p-2 border border-gray-500 rounded focus:outline-none" 
+        className={` w-full p-2 border ${error?"border-red-500":"border-gray-500"} rounded focus:outline-none`} 
         value={segmentName} 
-        onChange={(e)=>setSegmentName(e?.target?.value)}
+        onChange={(e)=>{setIsError(false);setSegmentName(e?.target?.value)}}
         />
         <p className=' w-[80%] mt-4'>
           To save your segment, you need to add the schemas to build the query
@@ -35,11 +51,12 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
          </div>
        </div>
 
-       <div className=' my-2'>
+       {
+        selectedSchemas.length!==0&&<div className=' my-2 border-4 border-sky-400'>
          {
           selectedSchemas?.map((i)=>(
             <>
-          <div className=' flex items-center gap-4 my-2 '>
+          <div className=' flex items-center gap-4 m-2 ' key={i?.value}>
           <span className={`inline-flex w-4 h-4 ${i?.type==="user"?" bg-green-500":"bg-pink-500"} rounded-full`}></span>
           <div className="relative inline-block text-left">
           <select className="block  w-[400px] appearance-none  bg-white border border-gray-500 py-2 px-4 pr-8 rounded leading-tight focus:outline-none">
@@ -52,7 +69,7 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
           </div>
           </div>
           <div>
-            <button className=' p-4 bg-blue-200'>
+            <button className=' p-4 bg-blue-200' onClick={()=>handleRemoveSchema(i.value)}>
               <span className='flex w-6 h-1 rounded-md bg-gray-600'></span>
             </button>
           </div>
@@ -61,14 +78,15 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
           ))
          }
        </div>
-       <div className='my-2 '>
+       }
+       <div className='m-3'>
          <div className=' flex items-center gap-4 '>
           <span className=' inline-flex w-4 h-4 bg-gray-300 rounded-full'></span>
           <div className="relative inline-block text-left">
           <select 
            value={newSchema}
-           onChange={(e) => setNewSchema(e.target.value)}
-          className="block  w-[400px] appearance-none  bg-white border border-gray-500 py-2 px-4 pr-8 rounded leading-tight focus:outline-none">
+           onChange={(e) => {setSchemaError(false);setNewSchema(e.target.value)}}
+          className={`block  w-[400px] appearance-none  bg-white border ${schemaError?"border-red-500":"border-gray-500"} py-2 px-4 pr-8 rounded leading-tight focus:outline-none`}>
           <option value="" >
           Add schema to segment            
           </option>
@@ -83,11 +101,12 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
           </div>
           </div>
           <div>
-            <button className=' p-4 bg-blue-200'>
+            <button className=' p-4 bg-blue-200' onClick={()=>handleReset()}>
               <span className='flex w-6 h-1 rounded-md bg-gray-600'></span>
             </button>
           </div>
          </div>
+         {schemaError&&<p className=' ml-[30px] font-medium text-sm text-red-500 mb-1'>Name is required</p>}
        </div>
        
        <div className=' ml-[30px] mt-4'>
@@ -95,7 +114,15 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
        </div>
        <div className=' bottom-0 absolute'>
         <div className=' flex gap-4 p-5'>
-          <button onClick={onSaveSegment} className=' bg-[#009F7F] text-white p-2 rounded'>Save the Segment</button>
+          <button onClick={()=>{
+            if(segmentName.length===0){
+              setIsError(true)
+            }else if(selectedSchemas.length===0){
+              setSchemaError(true)
+            }else if(!error&&!schemaError){
+              onSaveSegment()
+            }
+            }} className=' bg-[#009F7F] text-white p-2 rounded'>Save the Segment</button>
           <button onClick={onClose} className=' bg-gray-100 text-pink-500 p-2 rounded'>Cancel</button>
         </div>
        </div>
