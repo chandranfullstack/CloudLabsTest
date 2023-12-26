@@ -106,7 +106,7 @@ const  Popup=({ onClose,segmentName,setSegmentName,schemaOptions,selectedSchemas
             </button>
           </div>
          </div>
-         {schemaError&&<p className=' ml-[30px] font-medium text-sm text-red-500 mb-1'>Name is required</p>}
+         {schemaError&&<p className=' ml-[30px] font-medium text-sm text-red-500 mb-1'>schema is required</p>}
        </div>
        
        <div className=' ml-[30px] mt-4'>
